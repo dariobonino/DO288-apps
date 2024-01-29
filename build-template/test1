@@ -1,0 +1,18 @@
+il template si deve chiamare ex288-php
+
+deve essere usata l'image stream php:7.4-ubi8
+
+deve essere usata l'image mysql:8.0-el8
+
+deve essere deployato quotes del branch test-template
+
+deve essere presente una variabile HELLO_MESSAGE
+
+se si lancia oc delete all -l template=php-app cancella tutte le risorse
+
+se si lancia oc new-app ex288-php APP_DOMAIN=stoca-developer.${RHT_OCP4_WILDCARD_DOMAIN}
+viene stampato "Message" in stoca-developer.${RHT_OCP4_WILDCARD_DOMAIN}
+
+
+se si lancia oc new-app ex288-php -p APP_DOMAIN=stoca-developer.${RHT_OCP4_WILDCARD_DOMAIN} -p HELLO_MESSAGE="STAMI"
+viene stampato "Message STAMI" in stoca-developer.${RHT_OCP4_WILDCARD_DOMAIN}
