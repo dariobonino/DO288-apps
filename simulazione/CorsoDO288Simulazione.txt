@@ -2,161 +2,513 @@
 ########################################################################  INIZIALIZZAZIONI E FINALIZZAZIONI GLOBALI, DA FARE PRIMA E DOPO GLI ESERCIZI
 
 ## INIZIALIZZAZIONE GLOBALE
+lab probes start
+lab probes finish
 source /usr/local/etc/ocp4.config
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
+mkdir ~/test; cd ~/test; clear; pwd
 
 ## PULIZIA FINALE GLOBALE
-rm -Rf test
-podman kill $(podman ps -q) && podman rm $(podman ps -aq) && podman image prune -af
-podman logout --all > /dev/null 2> /dev/null
+cd ~/test
+rm -Rf test/*
+podman kill $(podman ps -q); podman rm $(podman ps -aq); podman image prune -af
+podman logout --all
 oc logout > /dev/null 2> /dev/null
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 oc delete project --all
 oc logout
 
-######################################################################## ESERCIZIO Deploy Application
+######################################################################## 01 ESERCIZIO Deploy Application
 
 ## INITIALIZATION
-
+lab source-build start
 mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://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@github.com/dariobonino/DO288-apps
+git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
-git checkout dario && git pull && git checkout -b temporary && git push -u origin temporary && cd ~/test && rm -Rf ~/test/deleteme
+git checkout dario && git pull && git checkout -b temporary && git push -u origin temporary 
+    ## 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
+cd ~/test && rm -Rf ~/test/deleteme
+oc new-project sottane
 
 ## TESTO 
-
-C'è un progetto già esistente "sottane" eseguire deploy di un applicazione "cutbin"
-
-Il repository git è "https://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@github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
+C'è un progetto già esistente "sottane" eseguire deploy di un applicazione "cutbin" a partire dai sorgenti nodejs
+-
+Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
 L'applicazione è contenuta nella directory "nodejs-helloworld"
-
+-
 L'applicazione è fatta con nodejs e il registry da impostare è "http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs"
-
-Se va in errore verificare cosa è andato storto nella build e correggere l'errore
-
-Alla fine dopo avere esposto la rotta servirà collegarsi alla home page dell'applicazione e ricevere il messaggio ""
-
-essendo un app fatta con nodejs viene fornito la build-env da impostare npm_config_registry
-c'è un errore nel package.json (manca la virgola dopo il field description)
-inserire una new entry con una scritta (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta)
+-
+Se va in errore verificare cosa è andato storto e correggere l'errore
+-
+Alla fine dopo avere esposto la rotta servirà collegarsi alla home page dell'applicazione e verificare di ricevere il messaggio "Hello World!"
 
 ## ESERCIZIO
+oc project sottane
+oc new-app --name=cutbin --strategy=source \
+   --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
+   --code=https://github.com/dariobonino/DO288-apps#temporary --context-dir=nodejs-helloworld
+oc logs -f bc/cutbin
+git clone https://github.com/dariobonino/DO288-apps
+cd ~/test/DO288-apps
+git checkout temporary
+vi nodejs-helloworld/package.json                    ## Correggere
+git commit -am fix
+git push                                             ## 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
+oc start-build bc/cutbin -F
+oc expose service/cutbin
+oc get all                                           ## trovi la route
+curl -is cutbin-sottane.apps.ocp4.example.com 
 
 ## FINALIZATION
-
-
+mkdir -p ~/test/deleteme && cd ~/test/deleteme 
+git clone https://github.com/dariobonino/DO288-apps
+cd ~/test/deleteme/DO288-apps
+git checkout temporary && git checkout main && git branch -d temporary && git push -d origin temporary 
+    ## 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
+cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
+lab source-build finish
 
 ## DIFFERENZE CON l'ESAME
 Il progetto si chiamerà "octane" e l'applicazione "pastebin"
 Non credo ci saranno branch da scegliere ne context-dir
+All'esame c'è un errore nel package.json (manca la virgola dopo il field description)
 Alla fine servirà inserire una new entry con una scritta fornita 
 (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta, + e poi inserire il testo e cliccare sul floppy per salvare)
 
-########################################################################
+######################################################################## 02 ESERCIZIO S2I
 
 ## INITIALIZATION
+lab s2i-scripts start
+mkdir -p ~/test/deleteme && cd ~/test/deleteme 
+git clone https://github.com/dariobonino/DO288-apps
+cd ~/test/deleteme/DO288-apps
+git checkout dario && git pull && git checkout -b s2ibranch && git push -u origin s2ibranch 
+    ## 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
+cd ~/test && rm -Rf ~/test/deleteme
 
 ## TESTO 
+Creare il progetto "s2iprj" e lavorare in quel contesto.
+Si dovra scaricare una immagine base da utilizzare con un progetto per fare una build S2I personalizzando il processo di build
+-
+Importare l'immagine "quay.io/marco_vassoney/httpd-24-rhel7" dal suo repository esterno con nome "httpd-24". E' una S2I image.
+-
+Scaricare il progetto "https://github.com/dariobonino/DO288-apps", branch "s2ibranch".
+Il contenuto nella directory "s2i-scripts" contiene i file di personalizzazione s2i
+Si personalizzi l'assemble affinche scriva un file info2.html che contenga la data ${date "+%Y-%m-%d"} e la stringa "Il mulo non vola"
+-
+Installare l'app usando il nome "oxyapp" e come image-stream quella appena importata
+Esporre il servizio e richiamare la pagina info2.html con le informazioni personalizzate
 
 ## ESERCIZIO
+oc new-project s2iprj
+podman login -u marco_vassoney -p VaMarco01 quay.io
+oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
+oc secrets link default quay --for=pull
+oc secrets link builder quay
+oc import-image httpd-24 --from quay.io/marco_vassoney/httpd-24-rhel7 --confirm
+oc get is
+git clone https://github.com/dariobonino/DO288-apps
+cd DO288-apps
+git checkout s2ibranch
+tree -a s2i-scripts
+vi s2i-scripts/.s2i/bin/assemble
+---------------------
+## Posizionarsi dopo "config_s2i"
+## Cancellare da riga 12 a riga 21 e riscrivere al loro posto
+cp -Rf /tmp/src/*.html ./
+DATE2=$(date "+%Y-%m-%d")
+echo "DATA CORRENTE: $DATE2" >> ./info2.html
+echo "Il mulo non vola" >> ./info2.html
+---------------------
+git commit -am fix
+git push                                             ## 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
+oc new-app --name=oxyapp httpd-24~https://github.com/dariobonino/DO288-apps#s2ibranch --context-dir=s2i-scripts
+oc logs -f bc/oxyapp
+oc expose service/oxyapp
+oc get all                                           ## trovi la route
+curl -is oxyapp-s2iprj.apps.ocp4.example.com/info2.html
+    
+## FINALIZATION
+mkdir -p ~/test/deleteme && cd ~/test/deleteme 
+git clone https://github.com/dariobonino/DO288-apps
+cd ~/test/deleteme/DO288-apps
+git checkout s2ibranch && git checkout main && git branch -d s2ibranch && git push -d origin s2ibranch 
+    ## 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
+cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
+podman logout --all
+lab s2i-scripts finish
+
+## DIFFERENZE CON l'ESAME
+Il registry non sarà quay.io e l'immagine non sarà quella usata qui, tutto sarà fornito all'esame. Idem per il repo git.
+NB: serve usare la tilde ~ anziche --image-stream per non scatenare la detection del tipo di s2i che andrebbe in errore
+
+######################################################################## 03 ESERCIZIO Containerfile Parent
+
+## INITIALIZATION
+lab container-build start
+oc new-project pipi
+oc logout && oc login -u admin -p redhat ${RHT_OCP4_MASTER_API}
+oc create serviceaccount popo
+oc adm policy add-scc-to-user anyuid -z popo
+oc logout && oc login -u developer -p developer ${RHT_OCP4_MASTER_API}
+cd ~/test
+
+## TESTO 
+usare il progetto "pipi" in cui andrà installata l'applicazione, in quel progetto c'è un servicaccount con nome "popo" che si dovrà utilizzare
+-
+Scaricare il repo "https://github.com/dariobonino/DO288-apps", nel branch "papa" sotto la directory "container-build/httpd-parent" ci sarà un Containerfile
+Ottimizzare il Containerfile affinchè ci sia il minor numero di layer possibili e l'immagine stia sotto i 256M, è un parent containe
+Aggiungere (non so a quale titolo)    "ONBUILD COPY src/ /var/www/html/"
+-
+Costruire l'immagine con podman e pusharla all'interno del repository esterno quay.io con nome "deleteme-parent"
+OPZIONALE: creare una immagine figlia che la richiami nel from e verificare che sia tutto ok
+-
+Avviare l'immagine caricata nel repository esterno quay.io, caricandola come immagine immagine esterna, con nome "pupu"
+No panic se in prima battuta il pod andrà in errore
+-
+Cambiare il service account usando "popo"
+exporre il servizio e verificare il messaggio della home "Hello from the httpd-parent container!"
+-
+
+## ESERCIZIO
+oc project pipi
+git clone https://github.com/dariobonino/DO288-apps
+cd DO288-apps
+vi ~/test/DO288-apps/container-build/httpd-parent/Containerfile
+--------------
+    creare meno layer possibili eliminando i run concatenandoli con ... && \
+    aggiungere ONBUILD COPY, EG: ONBUILD COPY src/ ${DOCROOT}/
+--------------
+podman build -t deleteme-parent --format=docker --layers=false ~/test/DO288-apps/container-build/httpd-parent
+podman images
+podman image inspect deleteme-parent | grep -A 10 RootFS
+mkdir -p ~/test/check/src                                                    ## VERIFICA OPZIONALE
+echo "FROM deleteme-parent" >> ~/test/check/Containerfile                    ## VERIFICA OPZIONALE
+echo "Hello from child image" >> ~/test/check/src/index.html                 ## VERIFICA OPZIONALE
+podman build -t deleteme-child ~/test/check/                                 ## VERIFICA OPZIONALE
+podman run --rm -d --name=check -p 8080:80 deleteme-child                    ## VERIFICA OPZIONALE
+curl localhost:8080                                                          ## VERIFICA OPZIONALE
+podman kill check                                                            ## VERIFICA OPZIONALE
+podman login -u marco_vassoney -p VaMarco01 quay.io
+podman push deleteme-parent quay.io/marco_vassoney/deleteme-parent
+skopeo inspect docker://quay.io/marco_vassoney/deleteme-parent
+oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
+oc secrets link default quay --for=pull
+oc secrets link builder quay
+oc new-app --name=pupu --image=quay.io/marco_vassoney/deleteme-parent
+### Ci mette un po prima di andare in errore che si vede con: oc logs -f pod/pupu-etc...
+oc patch deploy/pupu -p '{"spec":{"template":{"spec":{"serviceAccountName":"popo"}}}}'
+oc get deploy/pupu -o json | less
+oc expose service/pupu
+oc get all
+curl -is pupu-pipi.apps.ocp4.example.com
 
 ## FINALIZATION
+mkdir -p ~/test/deleteme && cd ~/test/deleteme 
+git clone https://github.com/dariobonino/DO288-apps
+cd ~/test/deleteme/DO288-apps
+git checkout papa && git checkout main && git branch -d papa && git push -d origin papa 
+    ## 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
+cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/check && rm -Rf ~/test/DO288-apps
+skopeo delete docker://quay.io/marco_vassoney/deleteme-parent
+podman logout --all
+lab container-build finish
 
 ## DIFFERENZE CON l'ESAME
 
-########################################################################
+######################################################################## 04 ESERCIZIO Liveness probe
+######################################################################## 05 ESERCIZIO Build hook (blog app)
 
 ## INITIALIZATION
+lab probes start
+cd ~/test 
+oc new-project twins
+oc new-app --name=jojo -i=nodejs:16-ubi8 --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
+   --strategy=source --code=https://github.com/dariobonino/DO288-apps#main --context-dir probes
+oc logs -f bc/jojo
+
 
 ## TESTO 
+Entrare nel progetto "twins" gia creato, in cui si troverà una applicazione in esecuzione dal nome "jojo"
+esporre il servizio e verificare che funzioni l'endpoint /healthz
+- 
+Aggiungere readiness probe su url /healthz su porta 8080                     (SI PUO SALTARE - NON C'E ALL'ESAME)
+Aggiungere liveness  probe su tcp port 8080 (opentcp) con Initialdelay 10 e Timeout 30
+-- 
+Impostare un build-hook post commit che fa fallire la build con uno script fallato e far fallire una build (SI PUO SALTARE - NON C'E ALL'ESAME)
+impostare un build-hook che esegue una echo del messaggio "STA ANDANDO TUTTO BENE !!!" durante la buid e rifare la build
+--
 
 ## ESERCIZIO
+oc project twins
+oc expose svc/jojo
+oc get all                                           ## trovi la route
+curl -is jojo-twins.apps.ocp4.example.com/healthz
+oc set probe deploy/jojo --readiness --get-url=http://:8080/healthz
+oc logs -f $(oc get pods -o name | grep -v build)
+oc set probe deploy/jojo --liveness  --open-tcp=8080 --initial-delay-seconds=10 --timeout-seconds=30
+oc describe deploy/jojo | grep Liveness
+##
+oc set build-hook bc/jojo --post-commit --script='echo "ciao" > /dev/tcp/hostnotfounf/27017'
+oc start-build bc/jojo -F
+oc set build-hook bc/jojo --post-commit --command -- echo "STA ANDANDO TUTTO BENE !!!"
+oc start-build bc/jojo -F
+oc get bc/jojo -o json | less
 
 ## FINALIZATION
+lab probes finish# 
 
 ## DIFFERENZE CON l'ESAME
+Sarà tutto da rivedere, comunque almeno per il BUILD-HOOK si dovrebbe riuscire a spedire una mail impostandolo cossì:
+oc set build-hook bc/hello --post-commit --command -- python Mailer.py .... o con indicazioni fornute all'esame
+Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesame@workstationesame e poi eseguire comando mail
 
-########################################################################
-## INITIALIZATION
-
-## TESTO 
-
-## ESERCIZIO
-
-## FINALIZATION
-
-## DIFFERENZE CON l'ESAME
-
-########################################################################
-
-## INITIALIZATION
-
-## TESTO 
-
-## ESERCIZIO
-
-## FINALIZATION
-
-## DIFFERENZE CON l'ESAME
-
-########################################################################
-
-## INITIALIZATION
-
-## TESTO 
-
-## ESERCIZIO
-
-## FINALIZATION
-
-## DIFFERENZE CON l'ESAME
-
-########################################################################
-
-## INITIALIZATION
-
-## TESTO 
-
-## ESERCIZIO
-
-## FINALIZATION
-
-## DIFFERENZE CON l'ESAME
-
-########################################################################
+######################################################################## 06 ESERCIZIO Config map
 
 ## INITIALIZATION
+lab app-config start
+cd ~/test 
+oc new-project pasticcio
+oc new-app --name ciccio --strategy source \
+   --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
+   --image-stream nodejs:16-ubi8 --code http://github.com/dariobonino/DO288-apps --context-dir app-config
+oc expose service/ciccio
 
 ## TESTO 
+Creare una configmap "sedici" con una property "APP_MSG"="Io amo la pizza"
+Assegnarla all'env del deployment dell'app in esecuzione "ciccio" del progetto "pasticcio" e verificare che compaia nella home
 
 ## ESERCIZIO
+oc project pasticcio
+oc create configmap sedici --from-literal APP_MSG="Io amo la pizza"
+oc get cm/sedici -o json
+oc set env deploy/ciccio --from cm/sedici
+oc set env deploy/ciccio --list
+curl http://ciccio-pasticcio.apps.ocp4.example.com/
 
 ## FINALIZATION
+lab app-config finish
 
 ## DIFFERENZE CON l'ESAME
+... Creare una cm sedicen con una property RESPONSE
 
-########################################################################
+######################################################################## 07 ESERCIZIO Template
 
 ## INITIALIZATION
+lab build-template start 
 
 ## TESTO 
+viene fornito un template, json o yaml, in una determinata url scaricare il json che è più semplice. Richieste:
+- il template è "https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-template/php-test.json" e si dovrà chiamare "ex288-dari-php"
+- Il repo te lo daranno loro, qui usare https://github.com/dariobonino/DO288-apps con branch dario e context-dir quotes
+- l'applicazione è raggiungibile in una determinata url nel nostro esempio ... non c'è ci limitiamo a verificare l'env del deploy/php-app
+- deve essere presente anche un parametro HELLO_AUDIENCE = Engineers, che non è presente
+- bisogna creare e usare il progetto "hazz" e utilizzare le ImageStream di php e mysql (fornite su openshift)
+- se si lancia  oc delete all -l template=php-app                       vengono cancellate tutte le risorse (la label del template deve essere php-app)
+- se si lancia  oc new-app ex288-exam-php                               va in errore
+- se si lancia  oc new-app ex288-exam-php -p APP_DOMAIN=XXXXXX          appare la scritta Bonjour Engineers!
+- se si lancia  oc new-app ex288-exam-php -p APP_DOMAIN=XXXXXX -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste" appare la scritta Namaste Architects!
 
 ## ESERCIZIO
+oc new-project hazz
+curl https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-template/php-test.json >> template.json
+#### EVENTUALMENTE   ln -s template.json file.txt   per editare il secondo in caso l'editor dia fastidio con i json
+------------------------ vi template.json
+"kind": "Template",
+    "apiVersion": "template.openshift.io/v1",
+    "labels": {
+        "template": "php-app"                                   ## IMPOSTARE "php-app"  
+    },
+    "metadata": {
+        "name": "ex288-dari-php",                               ## IMPOSTARE il nome
+	"namespace": "openshift",                               ## ELIMINARE QUI il namespace
+        "annotations": {
+------------------------
+oc get istag -n openshift | grep php                            ## SU ALTRA SHELL
+------------------------ vi template.json
+## .objects[king="BuildConfig"].spec.strategy.sourceStrategy.from.name ....   ## CERCARE /BuildConfig
+    "sourceStrategy": {
+        "from": {
+            "kind": "ImageStreamTag",
+            "name": "php:7.4-ubi8",                             ## METTERE latest o una disponibile, potrebbe già esserci
+            "namespace": "${NAMESPACE}"
+        }
+    },
+------------------------
+echo '{"name":"HELLO_MESSAGE","value":"${HELLO_MESSAGE}"}, {"name":"HELLO_AUDIENCE","value":"${HELLO_AUDIENCE}"},'
+------------------------ vi template.json
+## .objects[kind="Deployment"] di php .spec.template.spec.env ....   ## Cercare /"Deployment"
+"env": [
+    { "name":"HELLO_MESSAGE", "value":"${HELLO_MESSAGE}" }, { "name":"HELLO_AUDIENCE", "value":"${HELLO_AUDIENCE}" },   ## AGGIUNGERE LE VARIABILI
+    {
+    "name": "DATABASE_SERVICE_NAME",
+ ... omissis ...
+ "image": "${NAME}:latest",                                     ## VERIFICARE che sia così, uguale all'output del BuildConfig
+------------------------
+oc get istag -n openshift | grep mysql
+------------------------ vi template.json
+## .objects[kind="Deployment"] di mysql .spec.template.spec.containers.image ....   ## Cercare /"Deployment"                  
+],
+"image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql:8.0-el8",            ## METTERE latest o una disponibile
+"livenessProbe": {
+    "initialDelaySeconds": 30,
+    "tcpSocket": {
+------------------------ 
+echo '{ "name": "HELLO_MESSAGE", "value": "Bonjour" }, { "name": "HELLO_AUDIENCE", "value": "Engineers" }, '
+----------------------- vi template.json   PARAMETRI   (dati schiantati che ti daranno loro)
+ ... 
+ "name": "SOURCE_REPOSITORY_URL", "value": "https://github.com/dariobonino/DO288-apps",
+ "name": "SOURCE_REPOSITORY_REF", "value": "dario",
+ "name": "CONTEXT_DIR", "value": "quotes"
+ ...
+  { "name": "HELLO_MESSAGE", "value": "Bonjour" }, { "name": "HELLO_AUDIENCE", "value": "Engineers" },
+------------------------
+oc create -f template.json
+oc get templates
+--
+oc new-app ex288-dari-php       ## ERRORE
+--
+oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.example.com
+oc get all
+oc logs -f bc/php-app
+oc set env deploy/php-app --list
+curl -is default-developer.apps.ocp4.example.com          ## HTTP/1.1 200 OK - This app returns a random funny quote
+oc delete all -l template=php-app && oc delete secret/php-app
+-
+oc new-app ex288-dari-php -p APPLICATION_DOMAIN=setted-developer.${RHT_OCP4_WILDCARD_DOMAIN} -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste"
+oc get all
+oc logs -f bc/php-app
+oc set env deploy/php-app --list
+curl -is setted-developer.apps.ocp4.example.com          ## HTTP/1.1 200 OK - This app returns a random funny quote
 
 ## FINALIZATION
+lab build-template finish
 
 ## DIFFERENZE CON l'ESAME
+Il template si chiamerà "ex288-exam-php"
+Indicazioni di ema non necessarie qu ma da verificare poi
+ - verificare le image stream impostate nel template: sia di php che di mysql c'è una versione che non esiste. Mettere latest e non si sbaglia
+ - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config); 
+   per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
 
-########################################################################
+######################################################################## 08 ESERCIZIO Registry internal
 
 ## INITIALIZATION
+lab expose-registry start
+oc new-project primeur
+podman login -u developer -p $(oc whoami -t) default-route-openshift-image-registry.apps.ocp4.example.com
+skopeo copy oci:/home/student/DO288/labs/expose-registry/ubi-info docker://default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
+podman logout --all
+oc get is
+cd ~/test 
 
 ## TESTO 
+Il registry interno deve essere raggiungibile 
+Si deve scaricare un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info" del progetto "primeur"
+Qui si deve andare a verificare la "defaultRoute" che sia true, lo è già, all'esame sarà false da cambiare e si avrà i permessi per cambiarla.
+Per modificare le impostazioni della defaultRoute si può CAMBIARE TEMPORANEAMENTE utenza, diventando admin, e poi tornare developer, con queste istruzioni:
+   oc logout && oc login -u admin -p redhat https://api.ocp4.example.com:6443/
+   oc logout && oc login -u developer -p developer https://api.ocp4.example.com:6443/
+ATTENZIONE CHE SI OPERA COME ADMINISTRATOR
 
 ## ESERCIZIO
+oc project primeur
+oc get is                                                                               ## Si deve vedere l'immagine da scaricare ??
+oc logout && oc login -u admin -p redhat https://api.ocp4.example.com:6443/             ## DIVENTI ADMIN, NON SERVE ALL'ESAME
+oc edit configs.imageregistry.operator.openshift.io/cluster
+oc get route -n openshift-image-registry                                                ## VEDI LA DEFAULT ROUTE, non credo necessario
+oc logout && oc login -u developer -p developer https://api.ocp4.example.com:6443/      ## TORNI Developer, NON SERVE ALL'ESAME
+podman login -u developer -p $(oc whoami -t) default-route-openshift-image-registry.apps.ocp4.example.com
+podman pull default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
+podman images
+podman run --rm default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
 
 ## FINALIZATION
+oc logout && oc login -u developer -p developer https://api.ocp4.example.com:6443/
+cd ~/test
+podman logout --all
+lab expose-registry finish
 
 ## DIFFERENZE CON l'ESAME
+APPUNTI EMA per esporre fuori il registro conviene:
+collegarsi alla documentazione e selezionare la documentazione relativa al "Registry"
+nella pagina cercare la parola defaultRoute (il 2° risultato è il comando da lanciare)
+  oc patch configs.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"defaultRoute":true}}'
+eseguirlo. Non occorre impararlo a memoria.
+##ALTERNATIVA oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+
+######################################################################## 09 ESERCIZIO Helm
+
+## INITIALIZATION
+lab multicontainer-review start
+oc new-project myresource
+cd ~/test 
+
+## TESTO 
+usare il progetto myresource
+creare il grafo heml "dari-api" che deve essere in "/home/student/test/dari-api"
+La versione del chart deve essere "0.3.22"
+L'immagine del chart deve essere "quay.io/emadica/java-quarkus:latest", dovrà essere deployata su 2 nodi
+Cambiare la containerPort del deployment con 8080 (forse implicit e NON richiesto espessamente all'esame, cmq da fare)
+Impostare liveness e readiness probe su "/hello-resteasy" ??                    (All'esame sarà /q/health)
+Deve avere una label "tag" con valore "latest"
+--
+Installare e verificare dopo aver esposto il service
+
+## ESERCIZIO
+cd ~/test
+oc project myresource
+helm create dari-api
+cd ~/test/dari-api
+clear && pwd && tree -a .
+------------------------ vi Chart.yaml
+version: 0.3.22
+------------------------
+------------------------ vi values.yaml
+replicaCount: 2                                        ## due nodi
+ ... omissis ...
+image: 
+  repository: quay.io/emadica/java-quarkus             ## Danno loro l'immagine
+  pullPolicy: IfNotPresent
+  tag: "latest"                                        ## Danno loro l'immagine                     
+------------------------
+------------------------ vi templates/deployment.yaml
+imagePullPolicy: {{ .Values.image.pullPolicy }}
+ports:
+  - name: http
+    containerPort: 8080                                ## Impostare questa porta
+    protocol: TCP
+livenessProbe:
+  httpGet:
+    path: /hello-resteasy                              ## Cambiare qui
+    port: http
+readinessProbe:
+  httpGet:
+    path: /hello-resteasy                              ## Cambiare qui
+    port: http:
+------------------------
+------------------------ vi templates/_helpers.tpl
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+tag: latest
+{{- end}}
+------------------------
+helm install dari-api .
+oc expose service/dari-api
+curl -is dari-api-myresource.apps.ocp4.example.com/hello-resteasy && echo    
+firefox dari-api-myresource.apps.ocp4.example.com
+## helm delete dari-api && oc delete route/dari-api    ## In caso di ritentativi
+
+## FINALIZATION
+lab multicontainer-review finish
+cd ~/t
+
+## DIFFERENZE CON l'ESAME
+il chart project deve essere in /Home/devop/exam-api
+il project è exam-resource
+deve essere disponibile su http://exam-api-exam-resource.xxxx con 2 nodi
+Liveness e readiness su /q/health
+Versione chart 0.3.22
+Deve avere una label tag con valore latest
+è una quarkus image e loro forniscono l'immagine quay.io/emadica/java-quarkus:latest
 
 ########################################################################
