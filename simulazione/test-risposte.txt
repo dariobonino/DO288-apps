@@ -1,0 +1,27 @@
+
+######################################################################## 
+
+######################################################################## ESERCIZIO Deploy Application
+
+C'è un progetto già esistente "sottane" eseguire deploy di un applicazione "cutbin"
+
+Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "main"
+L'applicazione è contenuta nella directory "nodejs-helloworld"
+
+L'applicazione è fatta con nodejs e il registry da impostare è "http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs"
+
+Alla fine dopo avere esposto la rotta servirà collegarsi alla home page dell'applicazione e ricevere il messaggio ""
+
+essendo un app fatta con nodejs viene fornito la build-env da impostare npm_config_registry
+c'è un errore nel package.json (manca la virgola dopo il field description)
+inserire una new entry con una scritta (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta)
+
+
+## DIFFERENZE CON l'ESAME
+Il progetto si chiamerà "octane" e l'applicazione "pastebin"
+L'errore sarà la mancanza di una virgola dopo la description
+Alla fine servirà inserire una new entry con una scritta fornita 
+(collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta, + e poi inserire il testo e cliccare sul floppy per salvare)
+
+
+########################################################################
