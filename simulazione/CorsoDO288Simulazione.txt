@@ -6,12 +6,12 @@ lab probes start
 lab probes finish
 source /usr/local/etc/ocp4.config
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
-mkdir ~/test; cd ~/test; clear; pwd
+mkdir ~/test; cd ~/test; rm -Rf ~/test/*; clear; pwd
 ## Creare a partire da "dario" i seguenti branch: "temporary", "s2ibranch", "papa", 
 
 ## PULIZIA FINALE GLOBALE
 cd ~/test
-rm -Rf test/*
+rm -Rf ~/test/*
 podman kill $(podman ps -q); podman rm $(podman ps -aq); podman image prune -af
 podman logout --all
 oc logout > /dev/null 2> /dev/null
@@ -28,11 +28,10 @@ cd ~/test
 oc new-project sottane
 
 ## TESTO 
-C'è un progetto già esistente "sottane" eseguire deploy di un applicazione "cutbin" a partire dai sorgenti nodejs
+C'è un progetto già esistente "sottane", devi eseguire il deploy di un applicazione "cutbin" a partire dai sorgenti nodejs
 -
 Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
 L'applicazione è contenuta nella directory "nodejs-helloworld"
--
 L'applicazione è fatta con nodejs e il registry da impostare è "http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs"
 -
 Se va in errore verificare cosa è andato storto e correggere l'errore
@@ -75,7 +74,7 @@ cd ~/test
 
 ## TESTO 
 Creare il progetto "s2iprj" e lavorare in quel contesto.
-Si dovra scaricare una immagine base da utilizzare con un progetto per fare una build S2I personalizzando il processo di build
+Si dovra prima importare in Openshift una immagine base, per poi usarla com image-stream base in un progetto in cui si personalizza il processo di build s2i
 -
 Importare l'immagine "quay.io/marco_vassoney/httpd-24-rhel7" dal suo repository esterno con nome "httpd-24". E' una S2I image.
 -
@@ -139,13 +138,13 @@ cd ~/test
 usare il progetto "pipi" in cui andrà installata l'applicazione, in quel progetto c'è un servicaccount con nome "popo" che si dovrà utilizzare
 -
 Scaricare il repo "https://github.com/dariobonino/DO288-apps", nel branch "papa" sotto la directory "container-build/httpd-parent" ci sarà un Containerfile
-Ottimizzare il Containerfile affinchè ci sia il minor numero di layer possibili e l'immagine stia sotto i 256M, è un parent containe
+Ottimizzare il Containerfile affinchè ci sia il minor numero di layer possibili e l'immagine stia sotto i 256M, è un parent container
 Aggiungere (non so a quale titolo)    "ONBUILD COPY src/ /var/www/html/"
 -
 Costruire l'immagine con podman e pusharla all'interno del repository esterno quay.io con nome "deleteme-parent"
 OPZIONALE: creare una immagine figlia che la richiami nel from e verificare che sia tutto ok
 -
-Avviare l'immagine caricata nel repository esterno quay.io, caricandola come immagine immagine esterna, con nome "pupu"
+Avviare una new -app che carica l'immagine nel repository esterno quay.io, caricandola con una "docker-build", l'app deve avere nome "pupu"
 No panic se in prima battuta il pod andrà in errore
 -
 Cambiare il service account usando "popo"
@@ -234,10 +233,10 @@ oc start-build bc/jojo -F
 oc get bc/jojo -o json | less
 
 ## FINALIZATION
-lab probes finish# 
+lab probes finish
 
 ## DIFFERENZE CON l'ESAME
-Sarà tutto da rivedere, comunque almeno per il BUILD-HOOK si dovrebbe riuscire a spedire una mail impostandolo cossì:
+Sarà tutto da rivedere, comunque almeno per il BUILD-HOOK si dovrebbe riuscire a spedire una mail impostandolo così:
 oc set build-hook bc/hello --post-commit --command -- python Mailer.py .... o con indicazioni fornute all'esame
 Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesame@workstationesame e poi eseguire comando mail
 
@@ -279,7 +278,8 @@ lab build-template start
 viene fornito un template, json o yaml, in una determinata url scaricare il json che è più semplice. Richieste:
 - il template è "https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-template/php-test.json" e si dovrà chiamare "ex288-dari-php"
 - Il repo te lo daranno loro, qui usare https://github.com/dariobonino/DO288-apps con branch dario e context-dir quotes
-- l'applicazione è raggiungibile in una determinata url nel nostro esempio ... non c'è ci limitiamo a verificare l'env del deploy/php-app
+- l'applicazione è raggiungibile in una determinata url, nel nostro esempio "default-developer.apps.ocp4.example.com".
+- Dovrebbe esserci una webapp che legge variabili d'ambiente impostate, non c'è, ci limitiamo a verificare l'env del deploy/php-app
 - deve essere presente anche un parametro HELLO_AUDIENCE = Engineers, che non è presente
 - bisogna creare e usare il progetto "hazz" e utilizzare le ImageStream di php e mysql (fornite su openshift)
 - se si lancia  oc delete all -l template=php-app                       vengono cancellate tutte le risorse (la label del template deve essere php-app)
@@ -364,7 +364,7 @@ lab build-template finish
 
 ## DIFFERENZE CON l'ESAME
 Il template si chiamerà "ex288-exam-php"
-Indicazioni di ema non necessarie qu ma da verificare poi
+Indicazioni di ema non necessarie qui ma da verificare poi
  - verificare le image stream impostate nel template: sia di php che di mysql c'è una versione che non esiste. Mettere latest e non si sbaglia
  - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config); 
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
@@ -382,7 +382,7 @@ cd ~/test
 
 ## TESTO 
 Il registry interno deve essere raggiungibile 
-Si deve scaricare un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info" del progetto "primeur"
+Si deve scaricare con podman un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info" del progetto "primeur"
 Qui si deve andare a verificare la "defaultRoute" che sia true, lo è già, all'esame sarà false da cambiare e si avrà i permessi per cambiarla.
 Per modificare le impostazioni della defaultRoute si può CAMBIARE TEMPORANEAMENTE utenza, diventando admin, e poi tornare developer, con queste istruzioni:
    oc logout && oc login -u admin -p redhat https://api.ocp4.example.com:6443/
@@ -478,7 +478,7 @@ firefox dari-api-myresource.apps.ocp4.example.com
 
 ## FINALIZATION
 lab multicontainer-review finish
-cd ~/t
+cd ~/temp
 
 ## DIFFERENZE CON l'ESAME
 il chart project deve essere in /Home/devop/exam-api
@@ -490,3 +490,10 @@ Deve avere una label tag con valore latest
 è una quarkus image e loro forniscono l'immagine quay.io/emadica/java-quarkus:latest
 
 ########################################################################
+
+
+
+
+
+
+
