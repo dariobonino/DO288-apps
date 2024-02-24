@@ -26,7 +26,7 @@ mkdir -p ~/test/deleteme && cd ~/test/deleteme
 git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
 git checkout dario && git pull && git checkout -b temporary && git push -u origin temporary 
-    ## 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
+    ## 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
 cd ~/test && rm -Rf ~/test/deleteme
 oc new-project sottane
 
@@ -53,7 +53,7 @@ cd ~/test/DO288-apps
 git checkout temporary
 vi nodejs-helloworld/package.json                    ## Correggere
 git commit -am fix
-git push                                             ## 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
+git push                                             ## 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
 oc start-build bc/cutbin -F
 oc expose service/cutbin
 oc get all                                           ## trovi la route
@@ -64,7 +64,7 @@ mkdir -p ~/test/deleteme && cd ~/test/deleteme
 git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
 git checkout temporary && git checkout main && git branch -d temporary && git push -d origin temporary 
-    ## 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
+    ## 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
 cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
 lab source-build finish
 
@@ -83,7 +83,7 @@ mkdir -p ~/test/deleteme && cd ~/test/deleteme
 git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
 git checkout dario && git pull && git checkout -b s2ibranch && git push -u origin s2ibranch 
-    ## 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
+    ## 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
 cd ~/test && rm -Rf ~/test/deleteme
 
 ## TESTO 
@@ -121,7 +121,7 @@ echo "DATA CORRENTE: $DATE2" >> ./info2.html
 echo "Il mulo non vola" >> ./info2.html
 ---------------------
 git commit -am fix
-git push                                             ## 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
+git push                                             ## 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
 oc new-app --name=oxyapp httpd-24~https://github.com/dariobonino/DO288-apps#s2ibranch --context-dir=s2i-scripts
 oc logs -f bc/oxyapp
 oc expose service/oxyapp
@@ -133,7 +133,7 @@ mkdir -p ~/test/deleteme && cd ~/test/deleteme
 git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
 git checkout s2ibranch && git checkout main && git branch -d s2ibranch && git push -d origin s2ibranch 
-    ## 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
+    ## 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
 cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
 podman logout --all
 lab s2i-scripts finish
@@ -208,7 +208,7 @@ mkdir -p ~/test/deleteme && cd ~/test/deleteme
 git clone https://github.com/dariobonino/DO288-apps
 cd ~/test/deleteme/DO288-apps
 git checkout papa && git checkout main && git branch -d papa && git push -d origin papa 
-    ## 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
+    ## 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
 cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/check && rm -Rf ~/test/DO288-apps
 skopeo delete docker://quay.io/marco_vassoney/deleteme-parent
 podman logout --all
