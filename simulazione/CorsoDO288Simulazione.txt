@@ -7,6 +7,7 @@ lab probes finish
 source /usr/local/etc/ocp4.config
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 mkdir ~/test; cd ~/test; clear; pwd
+## Creare a partire da "dario" i seguenti branch: "temporary", "s2ibranch", "papa", 
 
 ## PULIZIA FINALE GLOBALE
 cd ~/test
@@ -17,17 +18,13 @@ oc logout > /dev/null 2> /dev/null
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 oc delete project --all
 oc logout
+## Eliminare i seguenti branch: "temporary", "s2ibranch", "papa", 
 
 ######################################################################## 01 ESERCIZIO Deploy Application
 
 ## INITIALIZATION
 lab source-build start
-mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://github.com/dariobonino/DO288-apps
-cd ~/test/deleteme/DO288-apps
-git checkout dario && git pull && git checkout -b temporary && git push -u origin temporary 
-    ## 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
-cd ~/test && rm -Rf ~/test/deleteme
+cd ~/test
 oc new-project sottane
 
 ## TESTO 
@@ -53,19 +50,14 @@ cd ~/test/DO288-apps
 git checkout temporary
 vi nodejs-helloworld/package.json                    ## Correggere
 git commit -am fix
-git push                                             ## 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
+git push                                             ## TOKEN ...
 oc start-build bc/cutbin -F
 oc expose service/cutbin
 oc get all                                           ## trovi la route
 curl -is cutbin-sottane.apps.ocp4.example.com 
 
 ## FINALIZATION
-mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://github.com/dariobonino/DO288-apps
-cd ~/test/deleteme/DO288-apps
-git checkout temporary && git checkout main && git branch -d temporary && git push -d origin temporary 
-    ## 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
-cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
+cd ~/test && rm -Rf ~/test/DO288-apps
 lab source-build finish
 
 ## DIFFERENZE CON l'ESAME
@@ -79,12 +71,7 @@ Alla fine servirà inserire una new entry con una scritta fornita
 
 ## INITIALIZATION
 lab s2i-scripts start
-mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://github.com/dariobonino/DO288-apps
-cd ~/test/deleteme/DO288-apps
-git checkout dario && git pull && git checkout -b s2ibranch && git push -u origin s2ibranch 
-    ## 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
-cd ~/test && rm -Rf ~/test/deleteme
+cd ~/test
 
 ## TESTO 
 Creare il progetto "s2iprj" e lavorare in quel contesto.
@@ -121,7 +108,7 @@ echo "DATA CORRENTE: $DATE2" >> ./info2.html
 echo "Il mulo non vola" >> ./info2.html
 ---------------------
 git commit -am fix
-git push                                             ## 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
+git push                                             ## TOKEN ...
 oc new-app --name=oxyapp httpd-24~https://github.com/dariobonino/DO288-apps#s2ibranch --context-dir=s2i-scripts
 oc logs -f bc/oxyapp
 oc expose service/oxyapp
@@ -129,12 +116,7 @@ oc get all                                           ## trovi la route
 curl -is oxyapp-s2iprj.apps.ocp4.example.com/info2.html
     
 ## FINALIZATION
-mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://github.com/dariobonino/DO288-apps
-cd ~/test/deleteme/DO288-apps
-git checkout s2ibranch && git checkout main && git branch -d s2ibranch && git push -d origin s2ibranch 
-    ## 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
-cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/DO288-apps
+cd ~/test && rm -Rf ~/test/DO288-apps
 podman logout --all
 lab s2i-scripts finish
 
@@ -174,6 +156,7 @@ exporre il servizio e verificare il messaggio della home "Hello from the httpd-p
 oc project pipi
 git clone https://github.com/dariobonino/DO288-apps
 cd DO288-apps
+git checkout papa
 vi ~/test/DO288-apps/container-build/httpd-parent/Containerfile
 --------------
     creare meno layer possibili eliminando i run concatenandoli con ... && \
@@ -204,12 +187,7 @@ oc get all
 curl -is pupu-pipi.apps.ocp4.example.com
 
 ## FINALIZATION
-mkdir -p ~/test/deleteme && cd ~/test/deleteme 
-git clone https://github.com/dariobonino/DO288-apps
-cd ~/test/deleteme/DO288-apps
-git checkout papa && git checkout main && git branch -d papa && git push -d origin papa 
-    ## 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
-cd ~/test && rm -Rf ~/test/deleteme && rm -Rf ~/test/check && rm -Rf ~/test/DO288-apps
+cd ~/test && rm -Rf ~/test/check && rm -Rf ~/test/DO288-apps
 skopeo delete docker://quay.io/marco_vassoney/deleteme-parent
 podman logout --all
 lab container-build finish
