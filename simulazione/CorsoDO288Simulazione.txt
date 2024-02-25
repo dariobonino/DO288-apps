@@ -1,6 +1,7 @@
-
-########################################################################  INIZIALIZZAZIONI E FINALIZZAZIONI GLOBALI, DA FARE PRIMA E DOPO GLI ESERCIZI
-
+########################################################################
+#### INIZIALIZZAZIONI E FINALIZZAZIONI GLOBALI, DA FARE PRIMA E DOPO GLI ESERCIZI
+#### Tempistiche: la somma dei tempi indicati è di 01:50 sulle 03:00 a disposizione
+########################################################################
 
 ## INIZIALIZZAZIONE GLOBALE
 lab probes start
@@ -23,7 +24,9 @@ oc delete project --all
 oc logout
 ## Eliminare i seguenti branch: "temporary", "s2ibranch", "papa",
 
-######################################################################## 01 ESERCIZIO Deploy Application
+########################################################################
+#### 01 ESERCIZIO Deploy Application  ~ 10 minuti
+########################################################################
 
 ## INITIALIZATION
 lab source-build start
@@ -69,7 +72,9 @@ All'esame c'è un errore nel package.json (manca la virgola dopo il field descri
 Alla fine servirà inserire una new entry con una scritta fornita
 (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta, + e poi inserire il testo e cliccare sul floppy per salvare)
 
-######################################################################## 02 ESERCIZIO S2I
+########################################################################
+#### 02 ESERCIZIO S2I ~ 20 minuti
+########################################################################
 
 ## INITIALIZATION
 lab s2i-scripts start
@@ -77,7 +82,7 @@ cd ~/test
 
 ## TESTO
 Creare il progetto "s2iprj" e lavorare in quel contesto.
-Si dovra prima importare in Openshift una immagine base, per poi usarla com image-stream base in un progetto in cui si personalizza il processo di build s2i
+Si dovra prima importare in Openshift una immagine base, per poi usarla come image-stream base in una build S2I in cui si personalizza l'assemble
 -
 Importare l'immagine "quay.io/marco_vassoney/httpd-24-rhel7" dal suo repository esterno con nome "httpd-24". E' una S2I image.
 -
@@ -126,7 +131,9 @@ lab s2i-scripts finish
 Il registry non sarà quay.io e l'immagine non sarà quella usata qui, tutto sarà fornito all'esame. Idem per il repo git.
 NB: serve usare la tilde ~ anziche --image-stream per non scatenare la detection del tipo di s2i che andrebbe in errore
 
-######################################################################## 03 ESERCIZIO Containerfile Parent
+########################################################################
+#### 03 ESERCIZIO Containerfile Parent ~ 20 minuti
+########################################################################
 
 ## INITIALIZATION
 lab container-build start
@@ -196,8 +203,10 @@ lab container-build finish
 
 ## DIFFERENZE CON l'ESAME
 
-######################################################################## 04 ESERCIZIO Liveness probe
-######################################################################## 05 ESERCIZIO Build hook (blog app)
+########################################################################
+#### 04 ESERCIZIO Liveness probe           ~ 5 minuti
+#### 05 ESERCIZIO Build hook (blog app)    ~ 5 minuti
+########################################################################
 
 ## INITIALIZATION
 lab probes start
@@ -243,7 +252,9 @@ Sarà tutto da rivedere, comunque almeno per il BUILD-HOOK si dovrebbe riuscire 
 oc set build-hook bc/hello --post-commit --command -- python Mailer.py .... o con indicazioni fornute all'esame
 Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesame@workstationesame e poi eseguire comando mail
 
-######################################################################## 06 ESERCIZIO Config map
+########################################################################
+#### 06 ESERCIZIO Config map ~ 5 minuti
+########################################################################
 
 ## INITIALIZATION
 lab app-config start
@@ -272,7 +283,9 @@ lab app-config finish
 ## DIFFERENZE CON l'ESAME
 ... Creare una cm sedicen con una property RESPONSE
 
-######################################################################## 07 ESERCIZIO Template
+########################################################################
+#### 07 ESERCIZIO Template ~ 30 minuti
+########################################################################
 
 ## INITIALIZATION
 lab build-template start
@@ -372,7 +385,9 @@ Indicazioni di ema non necessarie qui ma da verificare poi
  - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config);
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
 
-######################################################################## 08 ESERCIZIO Registry internal
+########################################################################
+#### 08 ESERCIZIO Registry internal ~ 5 minuti
+########################################################################
 
 ## INITIALIZATION
 lab expose-registry start
@@ -396,13 +411,13 @@ ATTENZIONE CHE SI OPERA COME ADMINISTRATOR
 oc project primeur
 oc get is                                                                               ## Si deve vedere l'immagine da scaricare ??
 oc logout && oc login -u admin -p redhat https://api.ocp4.example.com:6443/             ## DIVENTI ADMIN, NON SERVE ALL'ESAME
-oc edit configs.imageregistry.operator.openshift.io/cluster
+oc edit configs.imageregistry.operator.openshift.io/cluster                             ## NON MODIFICARE, defaultRoute vale già true
 oc get route -n openshift-image-registry                                                ## VEDI LA DEFAULT ROUTE, non credo necessario
 oc logout && oc login -u developer -p developer https://api.ocp4.example.com:6443/      ## TORNI Developer, NON SERVE ALL'ESAME
 podman login -u developer -p $(oc whoami -t) default-route-openshift-image-registry.apps.ocp4.example.com
 podman pull default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
 podman images
-podman run --rm default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
+podman run --rm -it default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0 printenv
 
 ## FINALIZATION
 oc logout && oc login -u developer -p developer https://api.ocp4.example.com:6443/
@@ -418,7 +433,9 @@ nella pagina cercare la parola defaultRoute (il 2° risultato è il comando da l
 eseguirlo. Non occorre impararlo a memoria.
 ##ALTERNATIVA oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
 
-######################################################################## 09 ESERCIZIO Helm
+########################################################################
+#### 09 ESERCIZIO Helm - 10 minuti
+########################################################################
 
 ## INITIALIZATION
 lab multicontainer-review start
@@ -493,10 +510,5 @@ Deve avere una label tag con valore latest
 è una quarkus image e loro forniscono l'immagine quay.io/emadica/java-quarkus:latest
 
 ########################################################################
-
-
-
-
-
-
-
+########################################################################
+########################################################################
