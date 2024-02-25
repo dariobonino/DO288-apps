@@ -5,6 +5,8 @@
 ## INIZIALIZZAZIONE GLOBALE
 lab probes start
 lab probes finish
+export QUAY_USERNAME="marco_vassoney"
+export QUAY_PASSWORD=$(echo "VmFNYXJjbzAxCg==" | base64 -d)
 source /usr/local/etc/ocp4.config
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 mkdir ~/test; cd ~/test; rm -Rf ~/test/*; clear; pwd
@@ -29,7 +31,7 @@ cd ~/test
 oc new-project sottane
 
 ## TESTO
-C'è un progetto già esistente "sottane", devi eseguire il deploy di un applicazione "cutbin" a partire dai sorgenti nodejs
+C'è un progetto già esistente "sottane", devi eseguire il deploy di un applicazione "cutbin" con build method S2I
 -
 Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
 L'applicazione è contenuta nella directory "nodejs-helloworld"
@@ -88,7 +90,7 @@ Esporre il servizio e richiamare la pagina info2.html con le informazioni person
 
 ## ESERCIZIO
 oc new-project s2iprj
-podman login -u marco_vassoney -p VaMarco01 quay.io
+podman login -u $QUAY_USERNAME -p $QUAY_PASSWORD quay.io
 oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
 oc secrets link default quay --for=pull
 oc secrets link builder quay
@@ -172,7 +174,7 @@ podman build -t deleteme-child ~/test/check/                                 ## 
 podman run --rm -d --name=check -p 8080:80 deleteme-child                    ## VERIFICA OPZIONALE
 curl localhost:8080                                                          ## VERIFICA OPZIONALE
 podman kill check                                                            ## VERIFICA OPZIONALE
-podman login -u marco_vassoney -p VaMarco01 quay.io
+podman login -u $QUAY_USERNAME -p $QUAY_PASSWORD quay.io
 podman push deleteme-parent quay.io/marco_vassoney/deleteme-parent
 skopeo inspect docker://quay.io/marco_vassoney/deleteme-parent
 oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
