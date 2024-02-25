@@ -1,13 +1,14 @@
 
 ########################################################################  INIZIALIZZAZIONI E FINALIZZAZIONI GLOBALI, DA FARE PRIMA E DOPO GLI ESERCIZI
 
+
 ## INIZIALIZZAZIONE GLOBALE
 lab probes start
 lab probes finish
 source /usr/local/etc/ocp4.config
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 mkdir ~/test; cd ~/test; rm -Rf ~/test/*; clear; pwd
-## Creare a partire da "dario" i seguenti branch: "temporary", "s2ibranch", "papa", 
+## Creare a partire da "dario" i seguenti branch: "temporary", "s2ibranch", "papa",
 
 ## PULIZIA FINALE GLOBALE
 cd ~/test
@@ -18,7 +19,7 @@ oc logout > /dev/null 2> /dev/null
 oc login -u developer -p developer https://api.ocp4.example.com:6443/
 oc delete project --all
 oc logout
-## Eliminare i seguenti branch: "temporary", "s2ibranch", "papa", 
+## Eliminare i seguenti branch: "temporary", "s2ibranch", "papa",
 
 ######################################################################## 01 ESERCIZIO Deploy Application
 
@@ -27,7 +28,7 @@ lab source-build start
 cd ~/test
 oc new-project sottane
 
-## TESTO 
+## TESTO
 C'è un progetto già esistente "sottane", devi eseguire il deploy di un applicazione "cutbin" a partire dai sorgenti nodejs
 -
 Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
@@ -53,7 +54,7 @@ git push                                             ## TOKEN ...
 oc start-build bc/cutbin -F
 oc expose service/cutbin
 oc get all                                           ## trovi la route
-curl -is cutbin-sottane.apps.ocp4.example.com 
+curl -is cutbin-sottane.apps.ocp4.example.com
 
 ## FINALIZATION
 cd ~/test && rm -Rf ~/test/DO288-apps
@@ -63,7 +64,7 @@ lab source-build finish
 Il progetto si chiamerà "octane" e l'applicazione "pastebin"
 Non credo ci saranno branch da scegliere ne context-dir
 All'esame c'è un errore nel package.json (manca la virgola dopo il field description)
-Alla fine servirà inserire una new entry con una scritta fornita 
+Alla fine servirà inserire una new entry con una scritta fornita
 (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta, + e poi inserire il testo e cliccare sul floppy per salvare)
 
 ######################################################################## 02 ESERCIZIO S2I
@@ -72,7 +73,7 @@ Alla fine servirà inserire una new entry con una scritta fornita
 lab s2i-scripts start
 cd ~/test
 
-## TESTO 
+## TESTO
 Creare il progetto "s2iprj" e lavorare in quel contesto.
 Si dovra prima importare in Openshift una immagine base, per poi usarla com image-stream base in un progetto in cui si personalizza il processo di build s2i
 -
@@ -113,7 +114,7 @@ oc logs -f bc/oxyapp
 oc expose service/oxyapp
 oc get all                                           ## trovi la route
 curl -is oxyapp-s2iprj.apps.ocp4.example.com/info2.html
-    
+
 ## FINALIZATION
 cd ~/test && rm -Rf ~/test/DO288-apps
 podman logout --all
@@ -134,7 +135,7 @@ oc adm policy add-scc-to-user anyuid -z popo
 oc logout && oc login -u developer -p developer ${RHT_OCP4_MASTER_API}
 cd ~/test
 
-## TESTO 
+## TESTO
 usare il progetto "pipi" in cui andrà installata l'applicazione, in quel progetto c'è un servicaccount con nome "popo" che si dovrà utilizzare
 -
 Scaricare il repo "https://github.com/dariobonino/DO288-apps", nel branch "papa" sotto la directory "container-build/httpd-parent" ci sarà un Containerfile
@@ -144,7 +145,7 @@ Aggiungere (non so a quale titolo)    "ONBUILD COPY src/ /var/www/html/"
 Costruire l'immagine con podman e pusharla all'interno del repository esterno quay.io con nome "deleteme-parent"
 OPZIONALE: creare una immagine figlia che la richiami nel from e verificare che sia tutto ok
 -
-Avviare una new -app che carica l'immagine nel repository esterno quay.io, caricandola con una "docker-build", l'app deve avere nome "pupu"
+Avviare una new-app che carica l'immagine nel repository esterno quay.io, build method "Container Image", l'app deve avere nome "pupu"
 No panic se in prima battuta il pod andrà in errore
 -
 Cambiare il service account usando "popo"
@@ -198,20 +199,20 @@ lab container-build finish
 
 ## INITIALIZATION
 lab probes start
-cd ~/test 
+cd ~/test
 oc new-project twins
 oc new-app --name=jojo -i=nodejs:16-ubi8 --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
    --strategy=source --code=https://github.com/dariobonino/DO288-apps#main --context-dir probes
 oc logs -f bc/jojo
 
 
-## TESTO 
+## TESTO
 Entrare nel progetto "twins" gia creato, in cui si troverà una applicazione in esecuzione dal nome "jojo"
 esporre il servizio e verificare che funzioni l'endpoint /healthz
-- 
+-
 Aggiungere readiness probe su url /healthz su porta 8080                     (SI PUO SALTARE - NON C'E ALL'ESAME)
 Aggiungere liveness  probe su tcp port 8080 (opentcp) con Initialdelay 10 e Timeout 30
--- 
+--
 Impostare un build-hook post commit che fa fallire la build con uno script fallato e far fallire una build (SI PUO SALTARE - NON C'E ALL'ESAME)
 impostare un build-hook che esegue una echo del messaggio "STA ANDANDO TUTTO BENE !!!" durante la buid e rifare la build
 --
@@ -244,14 +245,14 @@ Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesa
 
 ## INITIALIZATION
 lab app-config start
-cd ~/test 
+cd ~/test
 oc new-project pasticcio
 oc new-app --name ciccio --strategy source \
    --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
    --image-stream nodejs:16-ubi8 --code http://github.com/dariobonino/DO288-apps --context-dir app-config
 oc expose service/ciccio
 
-## TESTO 
+## TESTO
 Creare una configmap "sedici" con una property "APP_MSG"="Io amo la pizza"
 Assegnarla all'env del deployment dell'app in esecuzione "ciccio" del progetto "pasticcio" e verificare che compaia nella home
 
@@ -272,9 +273,9 @@ lab app-config finish
 ######################################################################## 07 ESERCIZIO Template
 
 ## INITIALIZATION
-lab build-template start 
+lab build-template start
 
-## TESTO 
+## TESTO
 viene fornito un template, json o yaml, in una determinata url scaricare il json che è più semplice. Richieste:
 - il template è "https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-template/php-test.json" e si dovrà chiamare "ex288-dari-php"
 - Il repo te lo daranno loro, qui usare https://github.com/dariobonino/DO288-apps con branch dario e context-dir quotes
@@ -295,7 +296,7 @@ curl https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-templa
 "kind": "Template",
     "apiVersion": "template.openshift.io/v1",
     "labels": {
-        "template": "php-app"                                   ## IMPOSTARE "php-app"  
+        "template": "php-app"                                   ## IMPOSTARE "php-app"
     },
     "metadata": {
         "name": "ex288-dari-php",                               ## IMPOSTARE il nome
@@ -325,16 +326,16 @@ echo '{"name":"HELLO_MESSAGE","value":"${HELLO_MESSAGE}"}, {"name":"HELLO_AUDIEN
 ------------------------
 oc get istag -n openshift | grep mysql
 ------------------------ vi template.json
-## .objects[kind="Deployment"] di mysql .spec.template.spec.containers.image ....   ## Cercare /"Deployment"                  
+## .objects[kind="Deployment"] di mysql .spec.template.spec.containers.image ....   ## Cercare /"Deployment"
 ],
 "image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql:8.0-el8",            ## METTERE latest o una disponibile
 "livenessProbe": {
     "initialDelaySeconds": 30,
     "tcpSocket": {
------------------------- 
+------------------------
 echo '{ "name": "HELLO_MESSAGE", "value": "Bonjour" }, { "name": "HELLO_AUDIENCE", "value": "Engineers" }, '
 ----------------------- vi template.json   PARAMETRI   (dati schiantati che ti daranno loro)
- ... 
+ ...
  "name": "SOURCE_REPOSITORY_URL", "value": "https://github.com/dariobonino/DO288-apps",
  "name": "SOURCE_REPOSITORY_REF", "value": "dario",
  "name": "CONTEXT_DIR", "value": "quotes"
@@ -366,7 +367,7 @@ lab build-template finish
 Il template si chiamerà "ex288-exam-php"
 Indicazioni di ema non necessarie qui ma da verificare poi
  - verificare le image stream impostate nel template: sia di php che di mysql c'è una versione che non esiste. Mettere latest e non si sbaglia
- - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config); 
+ - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config);
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
 
 ######################################################################## 08 ESERCIZIO Registry internal
@@ -378,10 +379,10 @@ podman login -u developer -p $(oc whoami -t) default-route-openshift-image-regis
 skopeo copy oci:/home/student/DO288/labs/expose-registry/ubi-info docker://default-route-openshift-image-registry.apps.ocp4.example.com/primeur/ubi-info:1.0
 podman logout --all
 oc get is
-cd ~/test 
+cd ~/test
 
-## TESTO 
-Il registry interno deve essere raggiungibile 
+## TESTO
+Il registry interno deve essere raggiungibile
 Si deve scaricare con podman un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info" del progetto "primeur"
 Qui si deve andare a verificare la "defaultRoute" che sia true, lo è già, all'esame sarà false da cambiare e si avrà i permessi per cambiarla.
 Per modificare le impostazioni della defaultRoute si può CAMBIARE TEMPORANEAMENTE utenza, diventando admin, e poi tornare developer, con queste istruzioni:
@@ -420,9 +421,9 @@ eseguirlo. Non occorre impararlo a memoria.
 ## INITIALIZATION
 lab multicontainer-review start
 oc new-project myresource
-cd ~/test 
+cd ~/test
 
-## TESTO 
+## TESTO
 usare il progetto myresource
 creare il grafo heml "dari-api" che deve essere in "/home/student/test/dari-api"
 La versione del chart deve essere "0.3.22"
@@ -445,10 +446,10 @@ version: 0.3.22
 ------------------------ vi values.yaml
 replicaCount: 2                                        ## due nodi
  ... omissis ...
-image: 
+image:
   repository: quay.io/emadica/java-quarkus             ## Danno loro l'immagine
   pullPolicy: IfNotPresent
-  tag: "latest"                                        ## Danno loro l'immagine                     
+  tag: "latest"                                        ## Danno loro l'immagine
 ------------------------
 ------------------------ vi templates/deployment.yaml
 imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -472,7 +473,7 @@ tag: latest
 ------------------------
 helm install dari-api .
 oc expose service/dari-api
-curl -is dari-api-myresource.apps.ocp4.example.com/hello-resteasy && echo    
+curl -is dari-api-myresource.apps.ocp4.example.com/hello-resteasy && echo
 firefox dari-api-myresource.apps.ocp4.example.com
 ## helm delete dari-api && oc delete route/dari-api    ## In caso di ritentativi
 
