@@ -34,7 +34,7 @@ cd ~/test
 oc new-project sottane
 
 ## TESTO
-C'è un progetto già esistente "sottane", devi eseguire il deploy di un applicazione "cutbin" con build method S2I
+C'è un progetto già esistente "sottane", devi eseguire il deploy "S2I" di un applicazione "cutbin" con build method S2I
 -
 Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
 L'applicazione è contenuta nella directory "nodejs-helloworld"
