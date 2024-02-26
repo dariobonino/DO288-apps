@@ -343,8 +343,8 @@ oc get istag -n openshift | grep mysql
 ------------------------ vi template.json
 ## .objects[kind="Deployment"] di mysql .spec.template.spec.containers.image ....   ## Cercare /"Deployment"
 ],
-"image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql:8.0-el8",            ## METTERE latest o una disponibile
-"livenessProbe": {
+"image": "image-registry.openshift-image-registry.svc:5000/openshift/mysql:8.0-el8",            ## METTERE latest o una disponibile da trovare con:
+"livenessProbe": {                                                                              ## oc get istag -n openshift | grep mysql
     "initialDelaySeconds": 30,
     "tcpSocket": {
 ------------------------
@@ -401,7 +401,7 @@ cd ~/test
 
 ## TESTO
 Il registry interno deve essere raggiungibile
-Si deve scaricare con podman un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info" del progetto "primeur"
+Si deve scaricare con podman un immagine YYYYY da un project XXXXX, nell'esempio sotto immagine "ubi-info:1.0" del progetto "primeur"
 Qui si deve andare a verificare la "defaultRoute" che sia true, lo è già, all'esame sarà false da cambiare e si avrà i permessi per cambiarla.
 Per modificare le impostazioni della defaultRoute si può CAMBIARE TEMPORANEAMENTE utenza, diventando admin, e poi tornare developer, con queste istruzioni:
    oc logout && oc login -u admin -p redhat https://api.ocp4.example.com:6443/
