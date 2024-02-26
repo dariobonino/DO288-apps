@@ -299,9 +299,9 @@ viene fornito un template, json o yaml, in una determinata url scaricare il json
 - deve essere presente anche un parametro HELLO_AUDIENCE = Engineers, che non è presente
 - bisogna creare e usare il progetto "hazz" e utilizzare le ImageStream di php e mysql (fornite su openshift)
 - se si lancia  oc delete all -l template=php-app                       vengono cancellate tutte le risorse (la label del template deve essere php-app)
-- se si lancia  oc new-app ex288-exam-php                               va in errore
-- se si lancia  oc new-app ex288-exam-php -p APP_DOMAIN=XXXXXX          appare la scritta Bonjour Engineers!
-- se si lancia  oc new-app ex288-exam-php -p APP_DOMAIN=XXXXXX -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste" appare la scritta Namaste Architects!
+- se si lancia  oc new-app ex288-dari-php                               va in errore
+- se si lancia  oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.example.com                                                           appare la scritta Bonjour Engineers!
+- se si lancia  oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.example.com -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste" appare la scritta Namaste Architects!
 
 ## ESERCIZIO
 oc new-project hazz
@@ -384,6 +384,7 @@ Indicazioni di ema non necessarie qui ma da verificare poi
  - verificare le image stream impostate nel template: sia di php che di mysql c'è una versione che non esiste. Mettere latest e non si sbaglia
  - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config);
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
+APPLICATION_DOMAIN probabilmente li sarà APP_DOMAIN
 
 ########################################################################
 #### 08 ESERCIZIO Registry internal ~ 5 minuti
