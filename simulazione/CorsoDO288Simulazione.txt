@@ -292,6 +292,7 @@ lab app-config finish
 
 ## INITIALIZATION
 lab build-template start
+oc new-project haz
 
 ## TESTO
 viene fornito un template, json o yaml, in una determinata url scaricare il json che è più semplice. Richieste:
@@ -300,14 +301,14 @@ viene fornito un template, json o yaml, in una determinata url scaricare il json
 - l'applicazione è raggiungibile in una determinata url, nel nostro esempio "default-developer.apps.ocp4.example.com".
 - Dovrebbe esserci una webapp che legge variabili d'ambiente impostate, non c'è, ci limitiamo a verificare l'env del deploy/php-app
 - deve essere presente anche un parametro HELLO_AUDIENCE = Engineers, che non è presente
-- bisogna creare e usare il progetto "hazz" e utilizzare le ImageStream di php e mysql (fornite su openshift)
+- bisogna usare il progetto "hazz" e utilizzare le ImageStream di php e mysql (fornite su openshift)
 - se si lancia  oc delete all -l template=php-app                       vengono cancellate tutte le risorse (la label del template deve essere php-app)
 - se si lancia  oc new-app ex288-dari-php                               va in errore
 - se si lancia  oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.example.com                                                           appare la scritta Bonjour Engineers!
 - se si lancia  oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.example.com -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste" appare la scritta Namaste Architects!
 
 ## ESERCIZIO
-oc new-project hazz
+oc project hazz
 curl https://raw.githubusercontent.com/dariobonino/DO288-apps/dario/build-template/php-test.json >> template.json
 #### EVENTUALMENTE   ln -s template.json file.txt   per editare il secondo in caso l'editor dia fastidio con i json
 ------------------------ vi template.json
