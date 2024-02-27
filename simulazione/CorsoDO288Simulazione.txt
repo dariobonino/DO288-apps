@@ -82,7 +82,8 @@ cd ~/test
 
 ## TESTO
 Creare il progetto "s2iprj" e lavorare in quel contesto.
-Si dovra prima importare in Openshift una immagine base, per poi usarla come image-stream base in una build S2I in cui si personalizza l'assemble
+Si deve fare una build S2I in cui nel progetto si personalizza l'assemble.
+L'immage-stream base da utilizzarsi non è immediatamente disponibile, come prima cosa la si deve importare in Openshift.
 -
 Importare l'immagine "quay.io/marco_vassoney/httpd-24-rhel7" dal suo repository esterno con nome "httpd-24". E' una S2I image.
 -
@@ -115,7 +116,7 @@ echo "DATA CORRENTE: $DATE2" >> ./info2.html
 echo "Il mulo non vola" >> ./info2.html
 ---------------------
 git commit -am fix
-git push                                             ## TOKEN ...
+git push
 oc new-app --name=oxyapp httpd-24~https://github.com/dariobonino/DO288-apps#s2ibranch --context-dir=s2i-scripts
 oc logs -f bc/oxyapp
 oc expose service/oxyapp
@@ -130,6 +131,7 @@ lab s2i-scripts finish
 ## DIFFERENZE CON l'ESAME
 Il registry non sarà quay.io e l'immagine non sarà quella usata qui, tutto sarà fornito all'esame. Idem per il repo git.
 NB: serve usare la tilde ~ anziche --image-stream per non scatenare la detection del tipo di s2i che andrebbe in errore
+NB: All'esame l'immagine nel registry è "rhscl/httpd-24-rhel7", usare il nome di questa immagine come identificativo per riconoscere l'esercizio.
 
 ########################################################################
 #### 03 ESERCIZIO Containerfile Parent ~ 20 minuti
@@ -145,7 +147,8 @@ oc logout && oc login -u developer -p developer ${RHT_OCP4_MASTER_API}
 cd ~/test
 
 ## TESTO
-usare il progetto "pipi" in cui andrà installata l'applicazione, in quel progetto c'è un servicaccount con nome "popo" che si dovrà utilizzare
+E' necessario costruire esternamente con podman una immagine base che sarà poi portata dentro Openshift e qui avviata con un serviceaccount dedicato.
+usare il progetto "pipi" in cui andrà installata l'applicazione, in quel progetto c'è un servicaccount con nome "popo" che si dovrà utilizzare alla fine.
 -
 Scaricare il repo "https://github.com/dariobonino/DO288-apps", nel branch "papa" sotto la directory "container-build/httpd-parent" ci sarà un Containerfile
 Ottimizzare il Containerfile affinchè ci sia il minor numero di layer possibili e l'immagine stia sotto i 256M, è un parent container
@@ -154,7 +157,7 @@ Aggiungere (non so a quale titolo)    "ONBUILD COPY src/ /var/www/html/"
 Costruire l'immagine con podman e pusharla all'interno del repository esterno quay.io con nome "deleteme-parent"
 OPZIONALE: creare una immagine figlia che la richiami nel from e verificare che sia tutto ok
 -
-Avviare una new-app che carica l'immagine nel repository esterno quay.io, build method "Container Image", l'app deve avere nome "pupu"
+Avviare una new-app di nome "pupu" con build method "Container Image", che scarica l'immagine dal repository esterno quay.io in cui l'abbiamo appena messa.
 No panic se in prima battuta il pod andrà in errore
 -
 Cambiare il service account usando "popo"
