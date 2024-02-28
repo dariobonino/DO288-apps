@@ -292,7 +292,7 @@ lab app-config finish
 
 ## INITIALIZATION
 lab build-template start
-oc new-project haz
+oc new-project hazz
 
 ## TESTO
 viene fornito un template, json o yaml, in una determinata url scaricare il json che è più semplice. Richieste:
