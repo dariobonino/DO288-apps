@@ -389,6 +389,8 @@ Indicazioni di ema non necessarie qui ma da verificare poi
  - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config);
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
 APPLICATION_DOMAIN probabilmente li sarà APP_DOMAIN
+Prepararsi a gestire una diversa configurazione al fondo dei parametri, pobabilmente ci sarà già HELLO_MESSAGE e non serviranno branch e context-dir
+- Commento di EMA da ricordare: modificare il name e lasciare solo il value php-app (togliere generated ed expression) ???
 
 ########################################################################
 #### 08 ESERCIZIO Registry internal ~ 5 minuti
