@@ -25,43 +25,27 @@ oc logout
 ## Eliminare i seguenti branch: "temporary", "s2ibranch", "papa",
 
 ########################################################################
-#### PRELIMINARI SOLO ALL'ESAME, INIZIALIZZAZIONE ~ 10 minuti
-########################################################################
-
-Ricordarsi che l'abilitazione della telecamera avviene nella barra di testo della chat, NON nella barra in alto
-
-1) Aprire gedit
-2) Andare nelle aditional information all'inizio del testo e cercare password utenze e ambienti
-3) Collegarsi in console remota sh ocdevop@workstation.xxxxx
-4) oc login
-5) podman login
-
-Bisogna sapere questi comandi git (altri non servono)
-[]$ git clone https://github.com/yourgituser/DO180-apps
-[]$ commit -am "fix"
-[]$ git push
-Non verrà mai chiesta una password o un token non si dovrà mai indicare un branch oppure un --context-dir
-
-########################################################################
 #### 01 ESERCIZIO Deploy Application  ~ 10 minuti
 ########################################################################
 
 ## INITIALIZATION
 lab source-build start
 cd ~/test
+oc new-project sottane
 
 ## TESTO
-Fare il deploy S2I di un progetto "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary",
-l'applicazione è contenuta nella directory "nodejs-helloworld"
+C'è un progetto già esistente "sottane", devi eseguire il deploy "S2I" di un applicazione "cutbin" con build method S2I
 -
-L'applicazione è fatta con nodejs e il registry da impostare con npm_config_registry è "http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs"
-(All'esame indicano sia il nome della variabile che l'intero valore)
+Il repository git è "https://github.com/dariobonino/DO288-apps", scegliere il branch "temporary"
+L'applicazione è contenuta nella directory "nodejs-helloworld"
+L'applicazione è fatta con nodejs e il registry da impostare è "http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs"
 -
-Alla fine collegandosi a "http://cutbin-sottane.apps.ocp4.example.com/" l'home page dell'applicazione deve restituire il messaggio "Hello World!"
-(Tipico approccio che varrà anche per tutti gli altri: dal risultato finale capisci quale deve essere il progetto e che servirà fare una espose)
+Se va in errore verificare cosa è andato storto e correggere l'errore
+-
+Alla fine dopo avere esposto la rotta servirà collegarsi alla home page dell'applicazione e verificare di ricevere il messaggio "Hello World!"
 
 ## ESERCIZIO
-oc new-project sottane                               ## Il nome lo devi recepire guardando la url del testo
+oc project sottane
 oc new-app --name=cutbin --strategy=source \
    --build-env npm_config_registry=http://${RHT_OCP4_NEXUS_SERVER}/repository/nodejs \
    --code=https://github.com/dariobonino/DO288-apps#temporary --context-dir=nodejs-helloworld
@@ -71,10 +55,10 @@ cd ~/test/DO288-apps
 git checkout temporary
 vi nodejs-helloworld/package.json                    ## Correggere
 git commit -am fix
-git push
+git push                                             ## TOKEN ...
 oc start-build bc/cutbin -F
 oc expose service/cutbin
-oc get all
+oc get all                                           ## trovi la route
 curl -is cutbin-sottane.apps.ocp4.example.com
 
 ## FINALIZATION
@@ -82,9 +66,10 @@ cd ~/test && rm -Rf ~/test/DO288-apps
 lab source-build finish
 
 ## DIFFERENZE CON l'ESAME
-L'applicazione si chiamerà "pastebin", ma non sarà in un progetto preesistente "octane", non ti dicono che andrà in errore!
+Il progetto si chiamerà "octane" e l'applicazione "pastebin"
+Non credo ci saranno branch da scegliere ne context-dir
 All'esame c'è un errore nel package.json (manca la virgola dopo il field description)
-All'esame alla fine servirà inserire una new entry con una scritta fornita
+Alla fine servirà inserire una new entry con una scritta fornita
 (collegandosi all'url fornita, in basso, ci sono i pulsanti per inserire la scritta, + e poi inserire il testo e cliccare sul floppy per salvare)
 
 ########################################################################
@@ -96,6 +81,7 @@ lab s2i-scripts start
 cd ~/test
 
 ## TESTO
+Creare il progetto "s2iprj" e lavorare in quel contesto.
 Si deve fare una build S2I in cui nel progetto si personalizza l'assemble.
 L'immage-stream base da utilizzarsi non è immediatamente disponibile, come prima cosa la si deve importare in Openshift.
 -
@@ -103,14 +89,13 @@ Importare l'immagine "quay.io/marco_vassoney/httpd-24-rhel7" dal suo repository 
 -
 Scaricare il progetto "https://github.com/dariobonino/DO288-apps", branch "s2ibranch".
 Il contenuto nella directory "s2i-scripts" contiene i file di personalizzazione s2i
-Si personalizzi l'assemble affinche scriva un file info2.html che contenga la data in formato YYYY-MM-DD e la stringa "Il mulo non vola"
+Si personalizzi l'assemble affinche scriva un file info2.html che contenga la data ${date "+%Y-%m-%d"} e la stringa "Il mulo non vola"
 -
 Installare l'app usando il nome "oxyapp" e come image-stream quella appena importata
-Richiamare http://oxyapp-s2iprj.apps.ocp4.example.com/ e verificare che ci sia il contenuto di DO288-apps/s2i-scripts/src/index.html
-Richiamare http://oxyapp-s2iprj.apps.ocp4.example.com/info2.html e verificare che ci siano le informazioni personalizzate
+Esporre il servizio e richiamare la pagina info2.html con le informazioni personalizzate
 
 ## ESERCIZIO
-oc new-project s2iprj                                       ## Il nome lo devi recepire guardando la url del testo
+oc new-project s2iprj
 podman login -u $QUAY_USERNAME -p $QUAY_PASSWORD quay.io
 oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
 oc secrets link default quay --for=pull
@@ -146,7 +131,7 @@ lab s2i-scripts finish
 ## DIFFERENZE CON l'ESAME
 Il registry non sarà quay.io e l'immagine non sarà quella usata qui, tutto sarà fornito all'esame. Idem per il repo git.
 NB: serve usare la tilde ~ anziche --image-stream per non scatenare la detection del tipo di s2i che andrebbe in errore
-NB: All'esame l'immagine nel registry è "rhscl/httpd-24-rhel7" e nell'assemble si dovrà scrivere in ./info.html
+NB: All'esame l'immagine nel registry è "rhscl/httpd-24-rhel7", usare il nome di questa immagine come identificativo per riconoscere l'esercizio.
 
 ########################################################################
 #### 03 ESERCIZIO Containerfile Parent ~ 20 minuti
@@ -220,8 +205,6 @@ podman logout --all
 lab container-build finish
 
 ## DIFFERENZE CON l'ESAME
-Il Containerfile dell'esame è differente, lasciando due istruzioni RUN ho ottenuto una immagine esattamente di 256 MB
-All'esame non parlano del "service account popo" ma qualcosa tipo "L'utenza popo ha le uuid necessarie", no panic usare il set "serviceAccountName"
 
 ########################################################################
 #### 04 ESERCIZIO Liveness probe           ~ 5 minuti
@@ -268,12 +251,9 @@ oc get bc/jojo -o json | less
 lab probes finish
 
 ## DIFFERENZE CON l'ESAME
-Entrambi gli esercizi si dovranno svolgere nel progetto "octane", sull'applicazione "blog"
-all'esame l'applicazione potrebbe usare i "DeploymentConfig" anzichè i "Deployment", quindi usando il tipo "deploy" puoi andare in errore.
-Requisito all'esame: "il probe persista dopo una ulteriore build del BuildConfig" ?!?!? Facendo la set probe come sopra è resistito a una rebuild.
-All'esame dovrà eseguire uno script python per inviare mail:
-  oc set build-hook bc/blog --post-commit --command -- python Mailer.py
-Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesame@workstationesame e poi eseguire il comando mail
+Sarà tutto da rivedere, comunque almeno per il BUILD-HOOK si dovrebbe riuscire a spedire una mail impostandolo così:
+oc set build-hook bc/hello --post-commit --command -- python Mailer.py .... o con indicazioni fornute all'esame
+Per vedere le mail che arrivano bisogna collegarsi con ssh nomeuserfornitoallesame@workstationesame e poi eseguire comando mail
 
 ########################################################################
 #### 06 ESERCIZIO Config map ~ 5 minuti
@@ -296,9 +276,6 @@ Assegnarla all'env del deployment dell'app in esecuzione "ciccio" del progetto "
 oc project pasticcio
 oc create configmap sedici --from-literal APP_MSG="Io amo la pizza"
 oc get cm/sedici -o json
-## (ESAME) oc create secret generic quay --from-file .dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type kubernetes.io/dockerconfigjson
-## (ESAME) oc secrets link default quay --for=pull  &&  oc secrets link builder quay
-## (ESAME) oc new-app --name=ciccio --image registry/openshift/hello-qualcosa
 oc set env deploy/ciccio --from cm/sedici
 oc set env deploy/ciccio --list
 curl http://ciccio-pasticcio.apps.ocp4.example.com/
@@ -307,8 +284,7 @@ curl http://ciccio-pasticcio.apps.ocp4.example.com/
 lab app-config finish
 
 ## DIFFERENZE CON l'ESAME
-All'esame l'applicazione NON è già deployata e chiedono di installare "openshift/hello-qualcosa", attenzione che è nel registry
-All'esame servirà creare una cm "sedicen" con una property "RESPONSE"
+... Creare una cm sedicen con una property RESPONSE
 
 ########################################################################
 #### 07 ESERCIZIO Template ~ 30 minuti
@@ -394,30 +370,27 @@ oc new-app ex288-dari-php -p APPLICATION_DOMAIN=default-developer.apps.ocp4.exam
 oc get all
 oc logs -f bc/php-app
 oc set env deploy/php-app --list
-curl -is default-developer.apps.ocp4.example.com                ## HTTP/1.1 200 OK - This app returns a random funny quote
-oc delete all -l template=php-app && oc delete secret/php-app   ## All'esame basterà "oc delete all -l template" a cancellare tutto
+curl -is default-developer.apps.ocp4.example.com          ## HTTP/1.1 200 OK - This app returns a random funny quote
+oc delete all -l template=php-app && oc delete secret/php-app
 -
 oc new-app ex288-dari-php -p APPLICATION_DOMAIN=setted-developer.${RHT_OCP4_WILDCARD_DOMAIN} -p HELLO_AUDIENCE="Architects" -p HELLO_MESSAGE="Namaste"
 oc get all
 oc logs -f bc/php-app
 oc set env deploy/php-app --list
-curl -is setted-developer.apps.ocp4.example.com                 ## HTTP/1.1 200 OK - This app returns a random funny quote
+curl -is setted-developer.apps.ocp4.example.com          ## HTTP/1.1 200 OK - This app returns a random funny quote
 
 ## FINALIZATION
 lab build-template finish
 
 ## DIFFERENZE CON l'ESAME
 Il template si chiamerà "ex288-exam-php"
-All'esame il template conterrà "DeploymentConfig" anzichè Deployment, muoversi cercando con vi le stringhe BuildConfig e "Deployment senza doppi appici di chiusura.
-All'esame "HELLO_MESSAGE" sarà già presente e richiamato
-Indicazioni di ema Dda ricordare perchè ci sarà qualcosa in più nei DeploymentConfig che in questi Deployment non c'è
+Indicazioni di ema non necessarie qui ma da verificare poi
  - verificare le image stream impostate nel template: sia di php che di mysql c'è una versione che non esiste. Mettere latest e non si sbaglia
  - il deployment di php e mysql sono senza image: per php impostare il ${NAME}:latest (quello impostato in output dal build config);
    per mysql mettere image-registry-..../mysql:latest (quello che si vede con il comando oc get istag -n openshift | grep mysql), perchè mysql non ha un build config
-Il parametro APPLICATION_DOMAIN deve essere impostato mandatory
-Il parametro NAME deve essere impostato con "value":"php-app" (togliere generated ed expression)
-Prepararsi a gestire una diversa configurazione al fondo dei parametri, inpostate il default del repository, mi pare che branch e context-dir possano rimanere opzionali senza default.
-VERIFICARE CHE NON RIMANGA UNA STRINGA "mysql:6.4" NEL TEMPLATE E VERIFICARE CHE IL POD DI MYSQL STIA SU, SE SBAGLI CON MYSQL INIZIALMENTE IL POD PHP PARTE COMUNQUE !!!
+APPLICATION_DOMAIN probabilmente li sarà APP_DOMAIN
+Prepararsi a gestire una diversa configurazione al fondo dei parametri, pobabilmente ci sarà già HELLO_MESSAGE e non serviranno branch e context-dir
+- Commento di EMA da ricordare: modificare il name e lasciare solo il value php-app (togliere generated ed expression) ???
 
 ########################################################################
 #### 08 ESERCIZIO Registry internal ~ 5 minuti
@@ -481,9 +454,9 @@ usare il progetto myresource
 creare il grafo heml "dari-api" che deve essere in "/home/student/test/dari-api"
 La versione del chart deve essere "0.3.22"
 L'immagine del chart deve essere "quay.io/emadica/java-quarkus:latest", dovrà essere deployata su 2 nodi
-Impostare liveness e readiness probe su "/hello-resteasy"  (All'esame sarà /q/health)
+Cambiare la containerPort del deployment con 8080 (forse implicit e NON richiesto espessamente all'esame, cmq da fare)
+Impostare liveness e readiness probe su "/hello-resteasy" ??                    (All'esame sarà /q/health)
 Deve avere una label "tag" con valore "latest"
-Nota: il container fornito si pone in ascolto sulla porta 8080
 --
 Installare e verificare dopo aver esposto il service
 
@@ -535,10 +508,13 @@ lab multicontainer-review finish
 cd ~/temp
 
 ## DIFFERENZE CON l'ESAME
-il chart project deve essere in ~/exam-api
-il project è exam-resource e dovrà essere disponibile su http://exam-api-exam-resource.xxxx con 2 nodi
-Liveness e readiness saranno su /q/health
-Anche all'esame sarà una quarkus image e loro forniscono l'immagine simile a quella "quay.io/emadica/java-quarkus:latest"
+il chart project deve essere in /Home/devop/exam-api
+il project è exam-resource
+deve essere disponibile su http://exam-api-exam-resource.xxxx con 2 nodi
+Liveness e readiness su /q/health
+Versione chart 0.3.22
+Deve avere una label tag con valore latest
+è una quarkus image e loro forniscono l'immagine quay.io/emadica/java-quarkus:latest
 
 ########################################################################
 ########################################################################
